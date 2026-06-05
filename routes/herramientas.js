@@ -7,8 +7,8 @@ const db = require("../config/db");
 //localhost:3000/herramientas
 //req = require = solicitud
 //res = response = respuesta (JSON)
-router.get("/", async(req, res) => {
-  try{
+router.get("/", async (req, res) => {
+  try {
     const query = 'SELECT * FROM herramientas';
 
     //Deserialización, el primer valor
@@ -18,11 +18,11 @@ router.get("/", async(req, res) => {
 
     //Devolvemos los datos obtenidos como JSON
     res.json({
-        success: true,
-        data: rows
+      success: true,
+      data: rows
     });
   }
-  catch(err){
+  catch (err) {
     //¿Por qué 500? Error generado del lado servidor
     res.status(500).json({
       success: false,
@@ -32,18 +32,50 @@ router.get("/", async(req, res) => {
   }
 });
 
+// BUSCADOR
+// http://IP:3000/api/herramientas/1
+router.get('/:id', async (req, res) => {
+  try {
+    const query = 'SELECT * FROM herramientas WHERE idherramienta = ?';
 
-router.post("/", async(req, res) => {
-    try{
+    // Deserialización, el primer valor
+    // El método query devuelve una MATRIZ (arreglo que contiene a otros arreglos)
+    // db.query = [[registros...], [info_query...]]
+    const [rows] = await db.query(query, [req.params.id]);
 
-    }catch(err){
-        //Por qué 500? Error generado del lado servidor
-        res.status(500).json({
+    // Es necesario validar si existen datos
+    if (rows.length === 0) {
+      return res.status(404).json({
         success: false,
-        message: 'Error en la comunicación al servidor',
-        error: err.message
-    })
+        message: 'No encontrado'
+      });
     }
+
+    // Devolvemos los datos obtenidos como JSON
+    res.status(200).json({
+      success: true,
+      data: rows
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+});
+
+router.post("/", async (req, res) => {
+  try {
+
+  } catch (err) {
+    //Por qué 500? Error generado del lado servidor
+    res.status(500).json({
+      success: false,
+      message: 'Error en la comunicación al servidor',
+      error: err.message
+    })
+  }
 })
 
 module.exports = router;
