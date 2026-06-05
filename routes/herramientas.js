@@ -65,17 +65,133 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+//Registrar
 router.post("/", async (req, res) => {
   try {
+    //Consulta esperada
+    const query = 'INSERT INTO herramientas (nombre, marca, descripcion, condicion, tipo) VALUES (?,?,?,?,?)';
+
+    //Obtener datos... deserializar objeto. Se debe respetar el orden+nombres de los ATRIBUTOS
+    const { nombre, marca, descripcion, condicion, tipo } = req.body;
+
+    //EL WS tiene que tener la capacidad de validar
+    if (!nombre || nombre == "") {
+      return res.status(400).json({ success: false, message: 'Se requiere el nombre' });
+    }
+
+    if (!marca || marca == "") {
+      return res.status(400).json({ success: false, message: 'Se requiere la marca' });
+    }
+
+    if (!descripcion || descripcion == "") {
+      return res.status(400).json({ success: false, message: 'Se requiere la descripción' });
+    }
+
+    //Datos requeridos para los comodines
+    const values = [
+      nombre,
+      marca,
+      descripcion,
+      condicion,
+      tipo
+    ];
+
+    //Ejecutar la consulta
+    const [result] = await db.query(query, values);
+    res.status(201).json({
+      success: true,
+      message: 'Herramienta registrada correctamente',
+      id: result.insertId
+    });
 
   } catch (err) {
-    //Por qué 500? Error generado del lado servidor
     res.status(500).json({
       success: false,
       message: 'Error en la comunicación al servidor',
       error: err.message
-    })
+    });
   }
-})
+});
+
+
+// Actualizar
+router.put('/:id', async (req, res) => {
+  try {
+
+    const query = `
+      UPDATE herramientas
+      SET nombre = ?, marca = ?, descripcion = ?, condicion = ?, tipo = ?
+      WHERE idherramienta = ?
+    `;
+
+    const { nombre, marca, descripcion, condicion, tipo } = req.body;
+
+    if (!nombre || nombre == "") {
+      return res.status(400).json({
+        success: false,
+        message: 'Se requiere el nombre'
+      });
+    }
+
+    if (!marca || marca == "") {
+      return res.status(400).json({
+        success: false,
+        message: 'Se requiere la marca'
+      });
+    }
+
+    if (!descripcion || descripcion == "") {
+      return res.status(400).json({
+        success: false,
+        message: 'Se requiere la descripción'
+      });
+    }
+
+    if (!condicion || condicion == "") {
+      return res.status(400).json({
+        success: false,
+        message: 'Se requiere la condición'
+      });
+    }
+
+    if (!tipo || tipo == "") {
+      return res.status(400).json({
+        success: false,
+        message: 'Se requiere el tipo'
+      });
+    }
+
+    const values = [
+      nombre,
+      marca,
+      descripcion,
+      condicion,
+      tipo,
+      req.params.id
+    ];
+
+    const [result] = await db.query(query, values);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Herramienta no encontrada'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Actualizado correctamente'
+    });
+
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: 'Error en la comunicación al servidor',
+      error: err.message
+    });
+  }
+});
+
 
 module.exports = router;
