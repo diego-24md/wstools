@@ -193,5 +193,29 @@ router.put('/:id', async (req, res) => {
   }
 });
 
+//Eliminar
+router.delete('/:id', async(req, res) => {
+    try{
+        const query = "DELETE FROM herramientas WHERE idherramienta = ?";
+        const [result] = await db.query(query, [req.params.id]);
+
+        if (result.affectedRows === 0){
+            return res.status(404).json({
+                success: false,
+                message: "No existe la herramienta que desea eliminar"
+            });
+        }
+
+        res.json({
+            success: true,
+            message: "Eliminado correctamente"
+        });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+});
 
 module.exports = router;

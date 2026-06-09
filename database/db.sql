@@ -23,3 +23,9 @@ INSERT INTO herramientas
   ('Taladro', 'DeWalt', 'Inalámbrico 18V');
 
   SELECT * FROM herramientas;
+
+DELIMITER $$
+CREATE PROCEDURE spu_herramientas_listar()
+BEGIN
+  SELECT * FROM herramientas ORDER BY idherramienta DESC;
+END $$
